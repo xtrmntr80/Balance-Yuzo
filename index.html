@@ -5,276 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#111111" />
   <title>収支ログ</title>
-
   <link rel="manifest" href="manifest.json" />
-
-  <!-- iOS向け（任意：アイコンを置くなら有効） -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="apple-touch-icon" href="icon-192.png" />
 
   <style>
     :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; margin: 0; }
+    body { font-family: system-ui, sans-serif; margin: 0; background-color: #111111; color: #ffffff; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 20px; }
     h1 { font-size: 18px; margin: 0 0 14px; }
-    .card { border: 1px solid rgba(127,127,127,.35); border-radius: 16px; padding: 14px; margin: 12px 0; }
+    .card { border: 1px solid rgba(127,127,127,.35); border-radius: 16px; padding: 14px; margin: 12px 0; background: #1a1a1a; }
     label { display: block; font-size: 12px; opacity: .8; margin: 10px 0 6px; }
-    input, textarea, button {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(127,127,127,.35);
-      background: transparent;
-      font-size: 16px;
-    }
-    textarea { min-height: 56px; resize: vertical; }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-    button { cursor: pointer; }
-    .primary { border-color: rgba(127,127,127,.55); }
-    .danger { border-color: rgba(255,0,0,.35); }
-    .totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    input, button { width: 100%; box-sizing: border-box; padding: 12px; border-radius: 12px; border: 1px solid rgba(127,127,127,.35); background: transparent; font-size: 16px; color: inherit; }
+    .row, .btnrow, .totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btnrow { margin-top: 12px; }
     .kpi { padding: 12px; border-radius: 14px; border: 1px solid rgba(127,127,127,.35); }
     .kpi .t { font-size: 12px; opacity: .8; margin-bottom: 8px; }
     .kpi .v { font-size: 22px; font-weight: 700; }
     .muted { font-size: 12px; opacity: .75; line-height: 1.5; }
     .hr { height: 1px; background: rgba(127,127,127,.25); margin: 12px 0; }
-    .ok { font-size: 12px; opacity: .9; }
-    .mini { font-size: 12px; opacity: .8; }
+    .danger { border-color: rgba(255,0,0,.5); color: #ff6666; }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <h1>パチンコ収支ログ（最小）</h1>
-
+    <h1>収支ログ</h1>
     <div class="card">
       <div class="totals">
-        <div class="kpi">
-          <div class="t">今月の収支（回収−投資）</div>
-          <div id="kpiMonth" class="v">—</div>
-        </div>
-        <div class="kpi">
-          <div class="t">累計の収支（回収−投資）</div>
-          <div id="kpiAll" class="v">—</div>
-        </div>
+        <div class="kpi"><div class="t">今月の収支</div><div id="kpiMonth" class="v">—</div></div>
+        <div class="kpi"><div class="t">累計収支</div><div id="kpiAll" class="v">—</div></div>
       </div>
       <div class="hr"></div>
-      <div class="muted">
-        ※ 入力は「投資」「回収」だけでOK。<br/>
-        ※ localStorage保存のため、端末のデータ削除等で消える可能性があります。CSVエクスポートが保険です。
-      </div>
+      <div class="muted">データはブラウザに保存されます。定期的なCSV出力を推奨します。</div>
     </div>
 
     <div class="card">
       <div class="row">
-        <div>
-          <label for="date">日付</label>
-          <input id="date" type="date" />
-        </div>
-        <div>
-          <label for="memo">メモ（任意）</label>
-          <input id="memo" type="text" placeholder="例：気分/一言だけ" />
-        </div>
+        <div><label>日付</label><input id="date" type="date" /></div>
+        <div><label>メモ</label><input id="memo" type="text" placeholder="例: 〇〇店" /></div>
       </div>
-
       <div class="row">
-        <div>
-          <label for="invest">投資（円）</label>
-          <input id="invest" type="number" inputmode="numeric" min="0" step="1" placeholder="例：20000" />
-        </div>
-        <div>
-          <label for="ret">回収（円）</label>
-          <input id="ret" type="number" inputmode="numeric" min="0" step="1" placeholder="例：0" />
-        </div>
+        <div><label>投資（円）</label><input id="invest" type="number" inputmode="numeric" /></div>
+        <div><label>回収（円）</label><input id="ret" type="number" inputmode="numeric" /></div>
       </div>
-
       <div class="btnrow">
-        <button id="saveBtn" class="primary">保存</button>
-        <button id="csvBtn">CSVエクスポート</button>
+        <button id="saveBtn" style="background: #333;">保存</button>
+        <button id="csvBtn">CSV出力</button>
       </div>
-
       <div class="btnrow">
-        <button id="clearBtn" class="danger">全データ削除（危険）</button>
-        <button id="sampleBtn">サンプル追加（テスト用）</button>
+        <button id="clearBtn" class="danger">全削除</button>
+        <button id="sampleBtn">サンプル</button>
       </div>
-
-      <div id="status" class="ok" style="margin-top:10px;"></div>
-      <div id="count" class="mini" style="margin-top:6px;"></div>
+      <div id="status" style="margin-top:10px; font-size:12px;"></div>
     </div>
   </div>
 
 <script>
 (() => {
   const KEY = "pachi_log_v1";
-
   const el = (id) => document.getElementById(id);
-  const dateEl = el("date");
-  const memoEl = el("memo");
-  const investEl = el("invest");
-  const retEl = el("ret");
-  const statusEl = el("status");
-  const countEl = el("count");
-  const kpiMonthEl = el("kpiMonth");
-  const kpiAllEl = el("kpiAll");
-
-  // 初期日付：今日
   const todayISO = new Date().toISOString().slice(0,10);
-  dateEl.value = todayISO;
+  el("date").value = todayISO;
 
-  const yen = (n) => {
-    const nf = new Intl.NumberFormat("ja-JP");
-    const sign = n > 0 ? "+" : "";
-    return sign + nf.format(n) + "円";
-  };
-
-  const load = () => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  };
-
-  const saveAll = (arr) => {
-    localStorage.setItem(KEY, JSON.stringify(arr));
-  };
-
-  const monthKey = (isoDate) => isoDate.slice(0,7); // YYYY-MM
-
-  const calc = (arr) => {
-    const nowMonth = monthKey(todayISO);
-
-    let all = 0;
-    let month = 0;
-
-    for (const x of arr) {
-      const net = (Number(x.ret) || 0) - (Number(x.invest) || 0);
-      all += net;
-      if (monthKey(x.date) === nowMonth) month += net;
-    }
-    return { all, month };
-  };
+  const yen = (n) => (n > 0 ? "+" : "") + new Intl.NumberFormat("ja-JP").format(n) + "円";
+  const load = () => JSON.parse(localStorage.getItem(KEY) || "[]");
+  const saveAll = (arr) => localStorage.setItem(KEY, JSON.stringify(arr));
 
   const render = () => {
     const arr = load();
-    const { all, month } = calc(arr);
-    kpiAllEl.textContent = yen(all);
-    kpiMonthEl.textContent = yen(month);
-    countEl.textContent = `記録件数：${arr.length}件`;
-  };
-
-  const setStatus = (msg) => {
-    statusEl.textContent = msg;
-    // 2.5秒で薄く消える
-    setTimeout(() => { if (statusEl.textContent === msg) statusEl.textContent = ""; }, 2500);
-  };
-
-  const mkId = () => {
-    // 簡易ID（衝突しにくい）
-    return (Date.now().toString(36) + Math.random().toString(36).slice(2,8)).toUpperCase();
+    const nowMonth = todayISO.slice(0,7);
+    let all = 0, month = 0;
+    arr.forEach(x => {
+      const net = (Number(x.ret) || 0) - (Number(x.invest) || 0);
+      all += net;
+      if (x.date.startsWith(nowMonth)) month += net;
+    });
+    el("kpiAll").textContent = yen(all);
+    el("kpiMonth").textContent = yen(month);
   };
 
   el("saveBtn").addEventListener("click", () => {
-    const date = dateEl.value || todayISO;
-    const invest = Number(investEl.value);
-    const ret = Number(retEl.value);
-    const memo = (memoEl.value || "").trim();
-
-    if (!Number.isFinite(invest) || invest < 0 || !Number.isFinite(ret) || ret < 0) {
-      setStatus("投資/回収は0以上の数字で入力してください。");
-      return;
-    }
-
-    // ありがちな入力ミス回避：両方空だと保存しない
-    if ((investEl.value === "" || invest === 0) && (retEl.value === "" || ret === 0) && memo === "") {
-      setStatus("空の記録は保存しません。");
-      return;
-    }
-
+    const data = {
+      id: Date.now().toString(36),
+      date: el("date").value || todayISO,
+      invest: Math.trunc(Number(el("invest").value) || 0),
+      ret: Math.trunc(Number(el("ret").value) || 0),
+      memo: el("memo").value.trim()
+    };
+    if (data.invest === 0 && data.ret === 0 && !data.memo) return;
     const arr = load();
-    arr.push({ id: mkId(), date, invest: Math.trunc(invest), ret: Math.trunc(ret), memo });
+    arr.push(data);
     saveAll(arr);
-
-    // 入力欄クリア（メモは残す派もいるが、最小は消す）
-    investEl.value = "";
-    retEl.value = "";
-    memoEl.value = "";
-    dateEl.value = todayISO;
-
     render();
-    setStatus("保存しました。");
+    ["invest", "ret", "memo"].forEach(id => el(id).value = "");
+    el("status").textContent = "保存完了";
+    setTimeout(() => el("status").textContent = "", 2000);
   });
 
   el("csvBtn").addEventListener("click", () => {
     const arr = load();
-    if (arr.length === 0) {
-      setStatus("データがありません。");
-      return;
-    }
-
-    // CSV
-    const header = ["id","date","invest","return","net","memo"];
-    const rows = arr.map(x => {
-      const inv = Number(x.invest) || 0;
-      const ret = Number(x.ret) || 0;
-      const net = ret - inv;
-      const memo = (x.memo ?? "").toString().replaceAll('"','""');
-      return [x.id, x.date, inv, ret, net, `"${memo}"`].join(",");
-    });
-    const csv = [header.join(","), ...rows].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
+    if (!arr.length) return;
+    const csv = ["id,date,invest,ret,memo"].concat(arr.map(x => `${x.id},${x.date},${x.invest},${x.ret},"${x.memo}"`)).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
-    const stamp = new Date().toISOString().slice(0,10);
-    a.href = url;
-    a.download = `pachi_log_${stamp}.csv`;
-    document.body.appendChild(a);
+    a.href = URL.createObjectURL(blob);
+    a.download = `log_${todayISO}.csv`;
     a.click();
-    a.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setStatus("CSVを作成しました。iOSは保存/共有が出る場合があります。");
   });
 
   el("clearBtn").addEventListener("click", () => {
-    const ok = confirm("本当に全データを削除しますか？この操作は戻せません。");
-    if (!ok) return;
-    localStorage.removeItem(KEY);
-    render();
-    setStatus("全データを削除しました。");
+    if (confirm("全データを削除しますか？")) { localStorage.removeItem(KEY); render(); }
   });
 
-  el("sampleBtn").addEventListener("click", () => {
-    const arr = load();
-    const d = new Date();
-    const iso = d.toISOString().slice(0,10);
-    const invest = [10000, 20000, 30000][Math.floor(Math.random()*3)];
-    const ret = [0, 5000, 12000, 25000][Math.floor(Math.random()*4)];
-    arr.push({ id: mkId(), date: iso, invest, ret, memo: "サンプル" });
-    saveAll(arr);
-    render();
-    setStatus("サンプルを追加しました。");
-  });
-
-  // Service Worker登録（HTTPSまたはlocalhostで有効）
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
-      try {
-        await navigator.serviceWorker.register("./sw.js");
-      } catch (e) {
-        // 登録失敗しても本体は動く
-      }
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
     });
   }
-
   render();
 })();
 </script>

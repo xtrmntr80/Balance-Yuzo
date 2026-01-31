@@ -65,8 +65,18 @@
 (() => {
   const KEY = "pachi_log_v1";
   const el = (id) => document.getElementById(id);
-  const todayISO = new Date().toISOString().slice(0,10);
+
+  // 日本時間に合わせたYYYY-MM-DDを取得
+  const getTodayJST = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); // ブラウザの時差を考慮
+    return d.toISOString().slice(0, 10);
+  };
+
+  const todayISO = getTodayJST();
   el("date").value = todayISO;
+  
+  // ...以下のコードはそのまま...
 
   const yen = (n) => (n > 0 ? "+" : "") + new Intl.NumberFormat("ja-JP").format(n) + "円";
   const load = () => JSON.parse(localStorage.getItem(KEY) || "[]");
